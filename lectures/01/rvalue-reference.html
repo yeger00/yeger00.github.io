@@ -1,0 +1,542 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../../css/reveal.css">
+        <link rel="stylesheet" href="../../css/theme/moon.css">
+        <link href='http://fonts.googleapis.com/css?family=Cookie' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+<section>
+    <br>
+    <h1 style="font-family: 'Cookie', Helvetica, sans-serif;">
+        C++11
+    </h1>
+    
+        Rvalue References & Move
+    
+</section>
+
+<section>
+<h3 style="text-align: left;">
+    Lvalue & Rvalue
+</h3>
+<p style="text-align: left;" class="fragment">
+    An <span style="color: #dbd150"><b>lvalue</b></span> (locator value) represents an object that occupies some identifiable location in memory
+    <br>
+</p>
+<pre class="fragment">
+int var;
+var = 4;
+</pre>
+<p style="text-align: left;" class="fragment">
+    An <span style="color: #dbd150"><b>rvalue</b></span> is an expression that is not an <span style="color: #dbd150"><b>lvalue</b></span>
+</p>
+<pre class="fragment">
+4 = var;       // ERROR!
+(var + 1) = 4; // ERROR!
+</pre>
+</section>  
+
+<section>
+<h3 style="text-align: left;">
+    Lvalue and Rvalue - example
+</h3>
+<pre>
+int foobar() {
+    // some code
+};
+
+int i = foobar();   // ok, foobar() is an rvalue
+int* p = &foobar(); // error, cannot take the address of an rvalue
+</pre>
+</section>
+
+<section data-transition="fade-out">
+<h3 style="text-align: left;">
+    The problem
+</h3>
+<pre>
+class MyString {
+public:
+    MyString(const char *data) : data_(nullptr) {
+        data_ = new char[strlen(data) + 1];
+        strcpy_s(data_, strlen(data) + 1, data);
+    };
+    MyString(const MyString &other) : data_(nullptr) {
+        data_ = new char[strlen(other.data_) + 1];
+        strcpy_s(data_, strlen(other.data_) + 1, other.data_);
+    };
+    ~MyString() {
+        delete[] data_;
+    };
+    char *data_;
+};
+
+</pre>
+</section>  
+ 
+<section data-transition="fade-in">
+<h3 style="text-align: left;">
+    The problem
+</h3>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    ~MyString();
+    char *data_;
+};
+
+</pre>
+</section>  
+
+<section data-transition="fade-out">
+<span>
+<h3 style="text-align: left;">
+    The problem - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(MyString("Hello"));
+</pre>
+</section>  
+
+<section data-transition="fade-out fade-in">
+<span>
+<h3 style="text-align: left;">
+    The problem - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    <b style="color: #dbd150">MyString(const char *data);</b>
+    MyString(const MyString &other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(<b style="color: #dbd150">MyString("Hello")</b>);
+</pre>
+<div class="fragment" data-fragment-index="1">
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+
+</section>  
+
+
+<section data-transition="fade-out fade-in">
+<span>
+<h3 style="text-align: left;">
+    The problem - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    <b style="color: #dbd150">MyString(const MyString &other);</b>
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+<b style="color: #dbd150">string_list.push_back(MyString("Hello"));</b>
+</pre>
+<div>
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+<div class="fragment" data-fragment-index="1">
+&darr;
+<br>
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+
+</section>  
+
+
+<section data-transition="fade-in">
+<span>
+<h3 style="text-align: left;">
+    The problem - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    <b style="color: #dbd150">~MyString();</b>
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(MyString("Hello"))<b style="color: #dbd150">;</b>
+</pre>
+<div class="fragment fade-out" data-fragment-index="1">
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+<div>
+<span class="fragment fade-out" data-fragment-index="1">
+&darr;
+</span>
+<br>
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+
+</section>
+
+<section>
+<h3 style="text-align: left;">
+    The problem
+</h3>
+<p style="text-align: left;">
+Needed only one object
+<br>
+<span class="fragment">
+But had to create two
+</span>
+</p>
+</section>  
+
+<section>
+<span>
+<h3 style="text-align: left;">
+    The problem - Can we detect it?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(<b style="color: #dbd150">MyString("Hello")</b>);
+</pre>
+<span class="fragment">rvalue!</span>
+</section>
+
+
+<section>
+<h3 style="text-align: left;">
+    Rvalue reference
+</h3>
+
+<pre>
+X <b style="color: #dbd150">&</b>x  // lvalue reference
+X <b style="color: #dbd150">&&</b>x // rvalue reference
+</pre>
+<p style="text-align: left;">
+Function overloading
+<br>
+Usually Copy C’tor and assignment operator
+<br>
+Called move semantics
+<br>
+Takes control over the data
+
+</p>
+</section>  
+
+<section data-transition="fade-in">
+<h3 style="text-align: left;">
+    Move
+</h3>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    MyString(MyString &&other) : data_(nullptr) {
+        data_ = other.data_;
+        other.data_ = nullptr;
+    };
+    ~MyString();
+    char *data_;
+};
+
+</pre>
+</section>  
+
+<section data-transition="fade-out">
+<span>
+<h3 style="text-align: left;">
+    Move - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    MyString(MyString &&other) : data_(nullptr) {
+        data_ = other.data_;
+        other.data_ = nullptr;
+    };
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(MyString("Hello"));
+</pre>
+</section>  
+
+<section data-transition="fade-out fade-in">
+<span>
+<h3 style="text-align: left;">
+    Move - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    <b style="color: #dbd150">MyString(const char *data);</b>
+    MyString(const MyString &other);
+    MyString(MyString &&other) : data_(nullptr) {
+        data_ = other.data_;
+        other.data_ = nullptr;
+    };
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+string_list.push_back(<b style="color: #dbd150">MyString("Hello")</b>);
+</pre>
+<div class="fragment" data-fragment-index="1" style="text-align: left;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+data_ &rarr;
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+
+</section>  
+
+<section data-transition="fade-out fade-in">
+<span>
+<h3 style="text-align: left;">
+    Move - Which c'tors will be called?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    <b style="color: #dbd150">MyString(MyString &&other) : data_(nullptr) {
+        data_ = other.data_;
+        other.data_ = nullptr;
+    };</b>
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+<b style="color: #dbd150">string_list.push_back(MyString("Hello"));</b>
+</pre>
+<div style="text-align: left;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+data_ <span class="fragment fade-out" data-fragment-index="2" >&rarr;</span>
+<ul>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>H</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>e</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>l</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>o</center></pre></li>
+<li style="display: inline-block; width: 50px; height: 50px; text-align: center;"><pre style="display: block; margin-top: 3px; border: solid 1px white;"><center>\0</center></pre></li>
+</ul>
+</div>
+<div style="text-align: left;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span class="fragment" data-fragment-index="2">&darr;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span class="fragment" data-fragment-index="1" >&uarr;</span>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span class="fragment" data-fragment-index="2" >\0</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span class="fragment" data-fragment-index="1" >data_</span>
+</div>
+</section>  
+
+
+<section data-transition="fade-out">
+<span>
+<h3 style="text-align: left;">
+    What if it’s not rvalue?
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    MyString(MyString &&other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+MyString my_string = MyString("Hello");
+string_list.push_back(my_string);
+</pre>
+</section>
+
+<section data-transition="fade-out">
+<span>
+<h3 style="text-align: left;">
+    Force rvalue with std::move
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    MyString(MyString &&other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+MyString my_string = MyString("Hello");
+string_list.push_back(<b style="color: #dbd150">std::move</b>(my_string));
+</pre>
+</section>
+
+<section data-transition="fade-out">
+<span>
+<h3 style="text-align: left;">
+    Force rvalue with std::move
+</h3>
+</span>
+<pre>
+class MyString {
+public:
+    MyString(const char *data);
+    MyString(const MyString &other);
+    MyString(MyString &&other);
+    ~MyString();
+    char *data_;
+};
+
+std::lis&lt;MyString&gt; string_list;
+MyString my_string = MyString("Hello");
+string_list.push_back(<b style="color: #dbd150">std::move</b>(my_string));
+</pre>
+</section>
+
+<section>
+<span>
+<h3 style="text-align: left;">
+    Force rvalue with std::move
+</h3>
+<p style="text-align: left;">
+std::move casts rvalue and lvalue into rvalue
+<br>
+The caller must not use the variable after
+</span>
+<pre class="fragment">
+std::lis&lt;MyString&gt; string_list;
+MyString my_string = MyString("Hello");
+string_list.push_back(std::move(my_string));
+// my_string is invalid
+</pre>
+</section>
+
+<section>
+<span>
+<h3 style="text-align: left;">
+    Further reading
+</h3>
+<p style="text-align: left;">
+<a href="http://thbecker.net/articles/rvalue_references/section_01.html">http://thbecker.net/articles/rvalue_references/section_01.html</a>
+<a href="https://eli.thegreenplace.net/2011/12/15/understanding-lvalues-and-rvalues-in-c-and-c/">https://eli.thegreenplace.net/2011/12/15/understanding-lvalues-and-rvalues-in-c-and-c/</a>
+<a href="http://shop.oreilly.com/product/0636920033707.do">http://shop.oreilly.com/product/0636920033707.do</a>
+</pre>
+</section>
+            </div>
+        </div>
+        <script src="../../js/reveal.js"></script>
+        <script src="../../lib/js/head.min.js"></script>
+        <script>
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: false,
+                dependencies: [
+                    { src: '../../plugin/search/search.js', async: true },
+                    // Zoom in and out with Alt+click
+                    { src: '../../plugin/zoom-js/zoom.js', async: true },
+
+                    // Speaker notes
+                    { src: '../../plugin/notes/notes.js', async: true },
+                ]
+            });
+        </script>
+    </body>
+</html>
