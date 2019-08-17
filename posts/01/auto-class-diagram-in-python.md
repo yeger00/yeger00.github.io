@@ -2,13 +2,17 @@
 
 Class diagram according to [Wikipedia](https://en.wikipedia.org/wiki/Class_diagram) is a: “structure diagram that describes the structure of a system by showing the system's classes, their attributes, operations (or methods), and the relationships among objects.”. It is a good and easy way to dive into a new library. Automatically generate class diagram make sure it is up to date.
 
-TL;DR:
+# TL;DR:
 1. Generate class diagram with [pyreverse](https://pypi.org/project/pyreverse/)
 1. View it with [graph-easy](https://github.com/ironcamel/Graph-Easy)
 1. Automatically generate it with git [hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
-1. View the diffs with [graphdiff](https://pypi.org/project/graphdiff/)
+1. View the diffs with [graphdiff](https://github.com/yeger00/graph-diff)
 
+# Example
+An example of the git-graph-diff-tool can be found in the [pylspclient](https://github.com/yeger00/pylspclient) repository:
+![](git-graph-diff-tool.png?raw=true "git-graph-diff-tool example")
 
+# How to
 In order to generate class diagram for a Python library, you can use the [pyreverse](https://pypi.org/project/pyreverse/) tool that is now part of [pylint](https://pypi.org/project/pylint/). In order to install you can:
 ```bash
 pip install pylint
