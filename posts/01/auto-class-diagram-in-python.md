@@ -50,7 +50,7 @@ echo "*.dot diff=graph_diff" >> .gitattributes
 ```
 Then, configure the difftool to be the git-graph-diff-tool. For example:
 ```bash
-git config diff.graph_diff.command /path/to/git-graph-diff-tool
+git config diff.graph_diff.command git-graph-diff-tool
 ```
 Then, you can use git as usual, while adding --ext-diff flag to enable external difftools.
 ```bash
