@@ -7,7 +7,9 @@
 <meta name="author" content="Avi Yeger">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="/css/fontawesome.min.css" rel="stylesheet">
+<link href="/css/all.min.css" rel="stylesheet">
 <link href="/css/brands.min.css" rel="stylesheet">
+<link href="/css/regular.min.css" rel="stylesheet">
 <script src="/js/terminal.js" type="text/javascript"></script>
 </head>
 <body class="is-preload">
@@ -19,6 +21,10 @@
 <style type="text/css">
 .hidden {
         opacity:0
+}
+
+.display-none {
+        display:none;
 }
 
 .console-underscore{
@@ -232,9 +238,6 @@ body :-ms-input-placeholder {
 p {
 	margin: 0;
 }
-h1 {
-	margin: 0;
-}
 
 a:link{
 	color:white;
@@ -248,6 +251,10 @@ a:hover {
 
 a:active {
 	color:white;
+}
+
+#text {
+  font-size: 10vh;
 }
 
 .text2 {
@@ -325,12 +332,10 @@ a:active {
 
 <header id="header">
 	<div class='console-container'>
-<h1>
 		<span id='text'></span>
 		<div class='console-underscore' id='console'
 			>&#95;
 		</div>
-</h1>
 	</div>
 	<div class='console-container'>
 		<span id='text2'></span>
@@ -344,6 +349,7 @@ a:active {
   <span>
 	<a href="https://github.com/yeger00/"><i class="fab fa-github"></i></a><!-- uses brand style -->
 	<a href="https://www.linkedin.com/in/avi-yeger-2726bb109/"><i class="fab fa-linkedin"></i></a><!-- uses brand style -->
+	<a href="./posts/"><i class="far fa-file-alt"></i></a>
   </span>
 </h1>
 </header>
