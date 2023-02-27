@@ -3,7 +3,7 @@
         return d.selection ? d.selection.createRange(1).text : d.getSelection(1);
     }; 
     let d = se(document); 
-    if (d == "") d = prompt("Enter%20search%20terms%20for%20Wikipedia","");
+    if (d == "") d = prompt("Enter%phone%number","");
     d = String(d).replace(/\D/g,"");
     open("https://wa.me/" + encodeURIComponent(d)).focus();
 })(document);'> Text on Whatsapp
