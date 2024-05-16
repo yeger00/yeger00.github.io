@@ -1,10 +1,11 @@
-javascript:(function(document) {
+<a href="javascript:(function(document) {
     function se(d) {
         return d.selection ? d.selection.createRange(1).text : d.getSelection(1);
     }; 
     let d = se(document); 
-    if (d == "") d = prompt("Enter phone number","");
-    d = String(d).replace(/\D/g,"");
-    if (d[0] == "0") {d = "972" + d.substring(1)};
-    open("https://wa.me/" + encodeURIComponent(d)).focus();
-})(document);
+    if (d == '') d = prompt('Enter phone number','');
+    d = String(d).replace(/\D/g, '');
+    if (d[0] == '0') {d = '972' + d.substring(1)};
+    open('https://wa.me/' + encodeURIComponent(d)).focus();
+})(document);"> Send message </a>
+<a href="javascript:(function(){document.designMode='on';})();"> Edit HTML </a>
