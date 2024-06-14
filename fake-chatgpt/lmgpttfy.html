@@ -2710,7 +2710,7 @@
 </style>
 <!-- start of fake GPT -->
 <style>
-    #fakeMouse { width: 10px; height: 10px; background: black; border-radius: 50%; position: absolute; top: 50px; left: 50px; }
+    #fakeMouse { width: 10px; height: 10px;  position: absolute; top: 50px; left: 50px; }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
@@ -2722,9 +2722,10 @@ function typeSearch(display, string, i, onDone) {
         setTimeout(onDone, 1000); // Wait a bit before opening Google search
     }
 }
-$(document).ready(function() {
-  //$('#searchButton').click(function() {
+
+function doTheSearch() {
     var display = $('#prompt-textarea');
+
     var params = new URLSearchParams(window.location.search);
     var text = params.get('q'); // Assumes the query parameter is named 'q'
 
@@ -2759,13 +2760,26 @@ $(document).ready(function() {
         }
     	typeSearch(display, text, 0, onDone);
     }
-  //});
+}
+
+$(document).ready(function() {
+    var ms_to_wait = 1500;
+    var display = $('#prompt-textarea');
+    var inputPosition = display.offset(); // Get the position of the input
+    $('#fakeMouse').show()
+    $('#fakeMouse').animate({
+        top: inputPosition.top,
+        left: inputPosition.left + display.width()
+    }, ms_to_wait);
+
+    setTimeout(doTheSearch, ms_to_wait);
+
 });
 </script>
 <!-- Enf of fake GPT -->
 
 <body class=antialiased>
-    <div id="fakeMouse"></div>
+    <div style="display: none; z-index: 100;" id="fakeMouse">▶</div>
     <div id=__next>
         <div class="relative z-0 flex h-full w-full overflow-hidden">
             <div class="flex-shrink-0 overflow-x-hidden bg-token-sidebar-surface-primary hideonphone" style=width:260px>
