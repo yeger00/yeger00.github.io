@@ -1,5 +1,12 @@
+<p>
+    Here is a list of useful Bookmarklets:
+</p>
 <ul>
     <li>
+        <p>
+            Open Whatsapp chat with the selected number. This remove the need to save the number as content in
+            order to send a message.
+        </p>
         <a href="javascript:(function(document) {
             function se(d) {
                 return d.selection ? d.selection.createRange(1).text : d.getSelection(1);
@@ -14,8 +21,17 @@
         </a>
     </li>
     <li>
+        <p>
+            Enable editing of HTML content directly in the page
+        </p>
         <a href="javascript:(function(){document.designMode='on';})();">
             Edit HTML
+        </a>
+    </li>
+    <li>
+        <p> Remove "—" from Chat GPT responses</p>
+        <a href="javascript:(function(){   document.body.innerHTML = document.body.innerHTML.replace(/—/g, ' '); })();">
+            Fix chat -
         </a>
     </li>
 </ul>
